@@ -102,12 +102,14 @@
                                     <span class="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Edit My Profile</span>
                                 </a>
                             @endif
-                            <a href="{{ route('events.create') }}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition group">
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span class="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Create Event</span>
-                            </a>
+                            @if(Auth::user()->isAlumni() || Auth::user()->isAdmin())
+                                <a href="{{ route('events.create') }}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition group">
+                                    <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Create Event</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>

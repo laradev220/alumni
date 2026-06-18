@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" x-data="{ role: 'student' }">
         @csrf
 
         <!-- Name -->
@@ -14,6 +14,40 @@
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Role -->
+        <div class="mt-4">
+            <x-input-label for="role" :value="__('I am a')" />
+            <select id="role" name="role" x-model="role" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="student">Student</option>
+                <option value="alumni">Alumni</option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
+        <!-- Alumni Fields -->
+        <div x-show="role === 'alumni'" x-transition class="mt-4 space-y-4">
+            <!-- Graduation Year -->
+            <div>
+                <x-input-label for="graduation_year" :value="__('Graduation Year')" />
+                <x-text-input id="graduation_year" class="block mt-1 w-full" type="number" name="graduation_year" :value="old('graduation_year')" min="1950" :max="date('Y')" />
+                <x-input-error :messages="$errors->get('graduation_year')" class="mt-2" />
+            </div>
+
+            <!-- Department -->
+            <div>
+                <x-input-label for="department" :value="__('Department')" />
+                <x-text-input id="department" class="block mt-1 w-full" type="text" name="department" :value="old('department')" />
+                <x-input-error :messages="$errors->get('department')" class="mt-2" />
+            </div>
+
+             <!-- Verification Document -->
+            <div>
+                <x-input-label for="verification_document" :value="__('Verification Document (CNIC/Roll No)')" />
+                <input id="verification_document" type="file" name="verification_document" class="block mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.jpg,.jpeg,.png" />
+                <x-input-error :messages="$errors->get('verification_document')" class="mt-2" />
+            </div>
         </div>
 
         <!-- Password -->

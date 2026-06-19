@@ -8,8 +8,10 @@ use Livewire\Component;
 class RsvpButton extends Component
 {
     public $eventId;
-    public $attending = false;
-    public $attendingCount = 0;
+    public $currentStatus = null;
+    public $goingCount = 0;
+    public $interestedCount = 0;
+    public $totalCount = 0;
 
     public function mount($eventId): void
     {
@@ -19,35 +21,71 @@ class RsvpButton extends Component
 
     protected function checkStatus(): void
     {
+        $event = Event::findOrFail($this->eventId);
+
         if (auth()->check()) {
-            $event = Event::findOrFail($this->eventId);
-            $this->attending = $event->attendees()
+            $this->currentStatus = $event->attendees()
                 ->where('user_id', auth()->id())
-                ->exists();
+                ->first()?->pivot?->status;
         }
 
-        $this->attendingCount = Event::findOrFail($this->eventId)
-            ->attendees()
-            ->count();
+        $this->refreshCounts($event);
     }
 
-    public function toggle(): void
+    protected function refreshCounts(?Event $event = null): void
+    {
+        $event ??= Event::findOrFail($this->eventId);
+
+        $this->goingCount = $event->attendees()
+            ->wherePivot('status', 'going')
+            ->count();
+
+        $this->interestedCount = $event->attendees()
+            ->wherePivot('status', 'interested')
+            ->count();
+
+        $this->totalCount = $this->goingCount + $this->interestedCount;
+    }
+
+    public function setStatus(string $status)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        if (! in_array($status, ['going', 'interested'], true)) {
+            abort(422, 'Invalid RSVP status.');
+        }
+
+        $event = Event::findOrFail($this->eventId);
+        $existingStatus = $event->attendees()
+            ->where('user_id', auth()->id())
+            ->first()?->pivot?->status;
+
+        if ($existingStatus === $status) {
+            $event->attendees()->detach(auth()->id());
+        } else {
+            $event->attendees()->syncWithoutDetaching([
+                auth()->id() => ['status' => $status],
+            ]);
+        }
+
+        $this->currentStatus = $existingStatus === $status ? null : $status;
+        $this->refreshCounts($event);
+        $this->dispatch('rsvpUpdated');
+    }
+
+    public function clearStatus()
     {
         if (!auth()->check()) {
             return redirect()->route('login');
         }
 
         $event = Event::findOrFail($this->eventId);
+        $event->attendees()->detach(auth()->id());
 
-        if ($this->attending) {
-            $event->attendees()->detach(auth()->id());
-            $this->attending = false;
-        } else {
-            $event->attendees()->attach(auth()->id(), ['status' => 'going']);
-            $this->attending = true;
-        }
-
-        $this->attendingCount = $event->attendees()->count();
+        $this->currentStatus = null;
+        $this->refreshCounts($event);
         $this->dispatch('rsvpUpdated');
     }
 

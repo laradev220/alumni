@@ -79,16 +79,17 @@ class EventController extends Controller
     {
         $event->load(['creator', 'attendees']);
 
-        $userRsvp = null;
-        if (auth()->check()) {
-            $userRsvp = $event->attendees()
-                ->where('user_id', auth()->id())
-                ->first()?->pivot;
-        }
+        $goingCount = $event->attendees()
+            ->wherePivot('status', 'going')
+            ->count();
 
-        $attendingCount = $event->attendees()->count();
+        $interestedCount = $event->attendees()
+            ->wherePivot('status', 'interested')
+            ->count();
 
-        return view('events.show', compact('event', 'userRsvp', 'attendingCount'));
+        $responseCount = $goingCount + $interestedCount;
+
+        return view('events.show', compact('event', 'goingCount', 'interestedCount', 'responseCount'));
     }
 
     /**

@@ -90,21 +90,34 @@
                     </div>
 
                     <!-- Attendees List -->
-                    @if($attendingCount > 0)
+                    @if($responseCount > 0)
                         <div class="border-t border-gray-200 pt-6 mb-6">
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Attendees ({{ $attendingCount }})</h3>
+                            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900">Responses ({{ $responseCount }})</h3>
+                                <div class="flex flex-wrap gap-2 text-xs text-gray-600">
+                                    <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-700">
+                                        {{ $goingCount }} going
+                                    </span>
+                                    <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">
+                                        {{ $interestedCount }} interested
+                                    </span>
+                                </div>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($event->attendees->take(20) as $attendee)
                                     <div class="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                                         <span class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600 mr-2">
                                             {{ substr($attendee->name, 0, 1) }}
                                         </span>
-                                        {{ $attendee->name }}
+                                        <span>{{ $attendee->name }}</span>
+                                        <span class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $attendee->pivot->status === 'going' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700' }}">
+                                            {{ ucfirst($attendee->pivot->status) }}
+                                        </span>
                                     </div>
                                 @endforeach
-                                @if($attendingCount > 20)
+                                @if($responseCount > 20)
                                     <span class="inline-flex items-center text-sm text-gray-500 px-3 py-1">
-                                        +{{ $attendingCount - 20 }} more
+                                        +{{ $responseCount - 20 }} more
                                     </span>
                                 @endif
                             </div>
